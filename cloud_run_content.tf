@@ -7,7 +7,7 @@ resource "google_cloud_run_service_iam_policy" "content-access" {
 data "google_iam_policy" "content" {
   binding {
     role = "roles/run.invoker"
-    members = ["allUsers"]
+    members = ["allAuthenticatedUsers"]
   }
 }
 
@@ -21,11 +21,14 @@ resource "google_cloud_run_service" "content-service" {
       annotations = {
         "autoscaling.knative.dev/maxScale"      = "1000"
         "run.googleapis.com/client-name"        = "terraform"
+        "run.googleapis.com/vpc-access-connector" = "${var.shared_vpc_connector}"
+        "run.googleapis.com/vpc-access-egress"    = "all-traffic"
+
       }
     }
     spec {
       containers {
-        image = "gcr.io/${var.shared_vpc_project_id}/content-microservice:${var.content_service_image_tag}"
+        image = "gcr.io/${var.shared_vpc_project_id}/gcp-docker-registry/content-microservice:${var.content_service_image_tag}"
         resources {
             limits = {
             memory = "1024Mi"
@@ -34,8 +37,44 @@ resource "google_cloud_run_service" "content-service" {
         }
         env {
             name = "url"
-            value = "aafes"
+            value = "dev-gcp"
         }
+        env {
+            name = "apiTestMode"
+            value = "true"
+        }
+        env {
+            name = "content.endpoint"
+            value = "/static-content/readAssets"
+        }
+        env {
+            name = "groupBy.hostname.url.test"
+            value = "https://y9vq4.mocklab.io"
+        }
+        env {
+            name = "mockResponse"
+            value = "false"
+        } 
+        env {
+            name = "staticContent.asset.contextRoot"
+            value = "${var.staticContent_asset_contextRoot}"
+        }
+        env {
+            name = "readAssetFromApache"
+            value = "true"
+        }
+        env {
+            name = "springdoc.swagger-ui.disable-swagger-default-url"
+            value = "true"
+        }  
+        env {
+            name = "springdoc.swagger-ui.path"
+            value = "/swagger"
+        }
+        env {
+            name = "server.servlet.context-path"
+            value = "/staticContent"
+        }                                                                            
       }
     }
   }

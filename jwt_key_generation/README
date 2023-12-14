@@ -1,0 +1,18 @@
+1 - Open https://shell.cloud.google.com/?show=ide%2Cterminal
+2 - Create keys folder in left nav of google shell vscode
+3 - Copy atg.py to keys folder
+4 - Copy atg.json to keys folder
+5 - pip install --upgrade google-api-python-client
+6 - pip install --upgrade google-auth
+7 - python atg.py
+
+The atg.py references an audience that varies per environment, it is currently set to dev's audience.
+
+The atg.json file is also unique to each environment - you will need to request the approriate key.
+	 
+PERF - ecom-np-perf-apigw-3g03bu4jh0lz7.apigateway.ecom-np-perf-385017.cloud.goog
+STAGE - ecom-np-stage-apigw-3ap9ip5e9sr6e.apigateway.ecom-np-stage-385017.cloud.goog
+QA - ecom-np-qa-apigw-014o747rit7aw.apigateway.ecom-np-qa-385017.cloud.goog
+DEV - ecom-np-dev-apigw-2qg3ggwzvl11q.apigateway.ecom-np-dev-385017.cloud.goog
+
+ 

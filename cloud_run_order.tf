@@ -6,8 +6,8 @@ resource "google_cloud_run_service_iam_policy" "order-access" {
 
 data "google_iam_policy" "order" {
   binding {
-    role = "roles/run.invoker"
-    members = ["allUsers"]
+    role    = "roles/run.invoker"
+    members = ["allAuthenticatedUsers"]
   }
 }
 
@@ -22,11 +22,13 @@ resource "google_cloud_run_service" "order-service" {
         "run.googleapis.com/client-name"   = "terraform"
         "autoscaling.knative.dev/maxScale" = 2
         "autoscaling.knative.dev/minScale" = 1
+        "run.googleapis.com/vpc-access-connector" = "${var.shared_vpc_connector}"
+        "run.googleapis.com/vpc-access-egress"    = "all-traffic"
       }
     }
     spec {
       containers {
-        image = "gcr.io/${var.shared_vpc_project_id}/order-microservice:${var.order_service_image_tag}"
+        image = "gcr.io/${var.shared_vpc_project_id}/gcp-docker-registry/order-microservice:${var.order_service_image_tag}"
         resources {
           limits = {
             memory = "1024Mi"
@@ -40,7 +42,7 @@ resource "google_cloud_run_service" "order-service" {
         }
         env {
           name  = "mao.env.domain.url"
-          value = "https://aafes.omni.manh.com"
+          value = "https://aafes3.omni.manh.com"
         }
         env {
           name  = "mao.orderlist.endpoint"
@@ -48,11 +50,11 @@ resource "google_cloud_run_service" "order-service" {
         }
         env {
           name  = "mao.auth.endpoint"
-          value = "https://aafes-auth.omni.manh.com/oauth/token"
+          value = "https://aafes3-auth.omni.manh.com/oauth/token"
         }
         env {
           name  = "aafes.env.domain.url"
-          value = "https://hawk-api.ecomint.aafes.com"
+          value = "${var.order_service_env_aafes-env-domain-url}"
         }
         env {
           name  = "mao.client.id"
@@ -88,8 +90,16 @@ resource "google_cloud_run_service" "order-service" {
         }
         env {
           name  = "mao.cancel.order.endpoint"
-          value = "/api/order/order"
-        }            
+          value = "/order/api/order/order/save"
+        }     
+        env {
+          name  = "logging.level.com.aafes.*"
+          value = "DEBUG"
+        }     
+       env {
+          name  = "mao.env.organization"
+          value = "ExchangeEcom"
+        }                       
       }
     }
   }

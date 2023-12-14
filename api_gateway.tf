@@ -1,16 +1,16 @@
 
 resource "google_api_gateway_api" "api_gw" {
-  display_name = "ecom-np-${var.env_name}-apigw"
+  display_name = "ecom-${var.env_name}-apigw"
   provider     = google-beta
-  api_id       = "ecom-np-${var.env_name}-apigw"
+  api_id       = "ecom-${var.env_name}-apigw"
   project      = var.project
 }
 
 resource "google_api_gateway_gateway" "api_gw" {
   provider     = google-beta
   api_config   = google_api_gateway_api_config.api_gw.id
-  gateway_id   = "ecom-np-${var.env_name}-gw"
-  display_name = "ecom-np-${var.env_name}-gw"
+  gateway_id   = "ecom-${var.env_name}-gw"
+  display_name = "ecom-${var.env_name}-gw"
   region       = var.region
   project      = var.project
 }
@@ -43,12 +43,14 @@ data "template_file" "swagger" {
     price_service_url = google_cloud_run_service.price-service.status[0].url
     content_service_url = google_cloud_run_service.content-service.status[0].url
     order_service_url = google_cloud_run_service.order-service.status[0].url
-     
-     # Service Account Vars:
+    akamai_service_url = google_cloud_run_service.akamai-service.status[0].url
+    
+    # Service Account Vars:
     service_mao_sa = var.service_mao_sa
     service_atg_sa = var.service_atg_sa
     service_mobile_sa = var.service_mobile_sa
-    
+    service_commerce_tools_sa = var.service_commerce_tools_sa
+
     # Generic:
     api_gw_spec_title = var.api_gw_spec_title
   }

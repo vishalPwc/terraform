@@ -6,8 +6,8 @@ resource "google_cloud_run_service_iam_policy" "search-access" {
 
 data "google_iam_policy" "search" {
   binding {
-    role = "roles/run.invoker"
-    members = ["allUsers"]
+    role    = "roles/run.invoker"
+    members = ["allAuthenticatedUsers"]
   }
 }
 
@@ -21,11 +21,14 @@ resource "google_cloud_run_service" "search-service" {
       annotations = {
         "autoscaling.knative.dev/maxScale" = "1000"
         "run.googleapis.com/client-name"   = "terraform"
+        "run.googleapis.com/vpc-access-connector" = "${var.shared_vpc_connector}"
+        "run.googleapis.com/vpc-access-egress"    = "all-traffic"
+
       }
     }
     spec {
       containers {
-        image = "gcr.io/${var.shared_vpc_project_id}/search-microservice:${var.search_service_image_tag}"
+        image = "gcr.io/${var.shared_vpc_project_id}/gcp-docker-registry/search-microservice:${var.search_service_image_tag}"
         resources {
           limits = {
             memory = "1024Mi"

@@ -7,7 +7,7 @@ resource "google_cloud_run_service_iam_policy" "price-access" {
 data "google_iam_policy" "price" {
   binding {
     role = "roles/run.invoker"
-    members = ["allUsers"]
+    members = ["allAuthenticatedUsers"]
   }
 }
 
@@ -21,16 +21,23 @@ resource "google_cloud_run_service" "price-service" {
       annotations = {
         "autoscaling.knative.dev/maxScale"      = "1000"
         "run.googleapis.com/client-name"        = "terraform"
+        "run.googleapis.com/vpc-access-connector" = "${var.shared_vpc_connector}"
+        "run.googleapis.com/vpc-access-egress"    = "all-traffic"
+
       }
     }
     spec {
       containers {
-        image = "gcr.io/${var.shared_vpc_project_id}/price-microservice:${var.price_service_image_tag}"
+        image = "gcr.io/${var.shared_vpc_project_id}/gcp-docker-registry/price-microservice:${var.price_service_image_tag}"
         resources {
             limits = {
             memory = "1024Mi"
             cpu    = "1000m"
           }
+        }
+        env {
+            name = "testmode"
+            value = "false"
         }
         env {
             name = "url"
